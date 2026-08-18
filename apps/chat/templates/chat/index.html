@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}DocCompanion — Private document intelligence{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="app-shell">
+    <aside class="sidebar" aria-label="Workspace navigation">
+        <div class="brand-row">
+            <div class="brand-mark"><i class="bi bi-stars"></i></div>
+            <div class="brand-copy">
+                <strong>DocCompanion</strong>
+                <span><i class="status-dot"></i> Private &amp; offline</span>
+            </div>
+            <button class="icon-button sidebar-close d-lg-none" type="button" onclick="closeSidebar()" aria-label="Close navigation">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="sidebar-primary">
+            <button id="newChatBtn" class="new-chat-button" type="button">
+                <span><i class="bi bi-plus-lg"></i> New conversation</span>
+                <kbd>⌘ K</kbd>
+            </button>
+        </div>
+
+        <section class="sidebar-section knowledge-section">
+            <div class="section-header">
+                <span>Knowledge base</span>
+                <span class="section-count">3</span>
+            </div>
+
+            <button class="upload-trigger" type="button" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                <span class="upload-trigger-icon"><i class="bi bi-cloud-arrow-up"></i></span>
+                <span><strong>Add documents</strong><small>PDF, DOCX, TXT and more</small></span>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+
+            <label class="sidebar-search">
+                <i class="bi bi-search"></i>
+                <input type="search" placeholder="Search documents" aria-label="Search documents">
+                <span>⌘F</span>
+            </label>
+
+            <div id="documentList" class="document-list">
+                <div class="document-item" data-id="demo-1">
+                    <div><i class="bi bi-file-earmark-pdf"></i><span>Employee Handbook.pdf</span></div>
+                    <i class="bi bi-trash delete-document"></i>
+                </div>
+                <div class="document-item" data-id="demo-2">
+                    <div><i class="bi bi-file-earmark-word"></i><span>HR Policy.docx</span></div>
+                    <i class="bi bi-trash delete-document"></i>
+                </div>
+                <div class="document-item" data-id="demo-3">
+                    <div><i class="bi bi-file-earmark-pdf"></i><span>SQL Guide.pdf</span></div>
+                    <i class="bi bi-trash delete-document"></i>
+                </div>
+            </div>
+        </section>
+
+        <section class="sidebar-section history-section">
+            <div class="section-header"><span>Recent chats</span></div>
+            <div id="historyList" aria-live="polite"></div>
+        </section>
+
+        <div class="sidebar-footer">
+            <button type="button"><i class="bi bi-gear"></i><span>Settings</span><i class="bi bi-chevron-right"></i></button>
+            <div class="privacy-note"><i class="bi bi-shield-check"></i><span><strong>Your data stays local</strong><small>Nothing leaves this device</small></span></div>
+        </div>
+    </aside>
+
+    <div class="sidebar-scrim d-lg-none" onclick="closeSidebar()" aria-hidden="true"></div>
+
+    <main class="main-panel">
+        <header class="chat-header">
+            <div class="header-title-group">
+                <button class="icon-button menu-button d-lg-none" type="button" onclick="toggleSidebar()" aria-label="Open navigation"><i class="bi bi-list"></i></button>
+                <div>
+                    <div class="eyebrow">Workspace / Conversation</div>
+                    <h1 id="conversationTitle">New conversation</h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="model-pill"><span></span> Local AI ready</div>
+                <button class="icon-button" type="button" onclick="location.reload()" aria-label="Refresh conversation" title="Refresh"><i class="bi bi-arrow-clockwise"></i></button>
+                <button class="icon-button" type="button" aria-label="More options" title="More options"><i class="bi bi-three-dots"></i></button>
+            </div>
+        </header>
+        <!--
+        <div class="context-bar">
+            <div class="context-label"><i class="bi bi-stack"></i><span>Answering from <strong>3 sources</strong></span></div>
+            <div class="source-chips">
+                <span><i class="bi bi-file-earmark-pdf"></i> Employee Handbook <button aria-label="Remove Employee Handbook">×</button></span>
+                <span><i class="bi bi-file-earmark-pdf"></i> SQL Guide <button aria-label="Remove SQL Guide">×</button></span>
+                <span class="optional-source"><i class="bi bi-file-earmark-word"></i> HR Policy <button aria-label="Remove HR Policy">×</button></span>
+            </div>
+        </div>
+        -->
+
+        <div id="chatContainer" class="chat-container">
+            <div class="message assistant-message">
+                <div class="avatar"><i class="bi bi-stars"></i></div>
+                <div class="message-body">
+                    <div class="message-meta"><strong>DocCompanion</strong></div>
+                    <div class="message-content welcome-message">
+                        <h2>Ready when you are.</h2>
+                        <p>I can search, compare, and explain information across your selected documents—with every answer grounded in your files.</p>
+                        <div class="prompt-suggestions">
+                            <button type="button" onclick="document.getElementById('promptInput').value='Summarize the key differences between ETL and ELT'; document.getElementById('promptInput').focus();"><i class="bi bi-journal-text"></i><span><strong>Summarize</strong><small>Give me the key takeaways</small></span><i class="bi bi-arrow-up-right"></i></button>
+                            <button type="button" onclick="document.getElementById('promptInput').value='Compare ETL and ELT in a table'; document.getElementById('promptInput').focus();"><i class="bi bi-layout-three-columns"></i><span><strong>Compare</strong><small>Find similarities and differences</small></span><i class="bi bi-arrow-up-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="typingIndicator" class="typing-indicator d-none" role="status" aria-live="polite" aria-hidden="true">
+            <div class="processing-copy">
+                <i class="bi bi-stars"></i>
+                <span id="processingLabel">Searching your documents…</span>
+            </div>
+            <div class="typing-dots" aria-hidden="true">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+        </div>
+
+        <footer class="chat-input-area">
+            <div class="composer">
+                <textarea id="promptInput" rows="1" class="form-control" placeholder="Ask anything about your documents…" aria-label="Message DocCompanion"></textarea>
+                <div class="composer-footer">
+                    <div class="composer-tools"><button type="button" data-bs-toggle="modal" data-bs-target="#uploadModal" aria-label="Attach documents"><i class="bi bi-paperclip"></i></button><span>3 sources selected</span></div>
+                    <div class="send-group"><span><kbd>↵</kbd> send · <kbd>⇧↵</kbd> new line</span><button id="sendButton" type="button" aria-label="Send message"><i class="bi bi-arrow-up"></i></button></div>
+                </div>
+            </div>
+            <p class="composer-disclaimer"><i class="bi bi-shield-lock"></i> Private by design. Responses may contain mistakes—verify important details.</p>
+        </footer>
+    </main>
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
+        <div class="modal-header"><div><span class="modal-kicker">Knowledge base</span><h5 class="modal-title">Add documents</h5></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <div class="modal-body"><form id="uploadForm" enctype="multipart/form-data"><label class="upload-box"><input type="file" name="documents" multiple><span class="upload-art"><i class="bi bi-cloud-arrow-up"></i></span><strong>Drop files here, or <u>browse</u></strong><small>PDF, DOCX, TXT, XLSX, CSV, PPTX · up to 25 MB each</small></label></form></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button id="uploadBtn" type="button" class="btn btn-primary"><i class="bi bi-cloud-upload"></i> Upload documents</button></div>
+    </div></div>
+</div>
+
+<div class="modal fade" id="deleteConversationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Delete conversation?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p class="mb-0">This conversation will be permanently removed. This action cannot be undone.</p></div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button id="confirmDeleteConversation" class="btn btn-danger">Delete conversation</button></div></div></div>
+</div>
+
+<div class="modal fade" id="deleteDocumentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Remove document?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p class="mb-0">This file and its index will be permanently removed from your knowledge base.</p></div><div class="modal-footer"><button class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button id="confirmDeleteDocument" class="btn btn-danger">Remove document</button></div></div></div>
+</div>
+{% endblock %}
+
+{% block js %}<script src="{% static 'js/chat.js' %}"></script>{% endblock %}

@@ -1,0 +1,46 @@
+# Virtual Environment
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Database
+db.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Media
+media/
+
+# Chroma
+chroma_db/
+
+# Uploads
+data/uploads/
+
+# Temporary
+data/temp/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Build
+dist/
+build/
+# Generated indexes and downloaded local models
+data/faiss/*.index
+*.gguf
+/models/qwen2.5-7b-instruct-q4_k_m.gguf 8.31.39 PM
+/dump.rdb

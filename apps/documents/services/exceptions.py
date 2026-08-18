@@ -1,0 +1,3 @@
+
+class UnsupportedDocument(Exception):
+    pass
